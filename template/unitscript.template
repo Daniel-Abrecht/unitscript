@@ -1,0 +1,15 @@
+#ifndef US_UNITSCRIPT_TEMPLATE
+#define US_UNITSCRIPT_TEMPLATE
+
+#include <stdbool.h>
+
+#define PARSABLE_STRUCTURES \
+  BLOCK( unitscript, ( \
+    ENTRY( string, "user", user ) \
+    ENTRY( string, "group", group ) \
+    ENTRY( map, "env", env ) \
+    ENTRY( string, "program", program ) \
+  ))
+
+#include <US/yamlparser.generator>
+#endif
