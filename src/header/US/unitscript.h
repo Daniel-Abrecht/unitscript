@@ -8,6 +8,7 @@ enum us_status {
   US_STOPPED
 };
 
+int us_prepare( us_unitscript_t* unit );
 int us_start( us_unitscript_t* unit );
 int us_stop( us_unitscript_t* unit );
 int us_status( us_unitscript_t* unit, enum us_status* status );

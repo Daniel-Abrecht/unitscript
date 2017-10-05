@@ -6,12 +6,12 @@
 
 int main( int argc, const char* argv[] ){
   if( argc < 2 ){
-    fprintf(stderr,"Usage: %s file {start,stop,status,restart,zap}\n",argv[0]);
+    fprintf(stderr,"Usage: %s file {start,stop,status,restart,zap,check}\n",argv[0]);
     return 1;
   }
 
   if( argc != 3 ){
-    fprintf(stderr,"Usage: %s {start,stop,status,restart,zap}\n",argv[1]);
+    fprintf(stderr,"Usage: %s {start,stop,status,restart,zap,check}\n",argv[1]);
     return 1;
   }
 
@@ -31,21 +31,26 @@ int main( int argc, const char* argv[] ){
 
   int ret = 0;
 
-  if( !strcmp(argv[2],"start") ){
-    ret = us_start( unit );
-  }else if( !strcmp(argv[2],"stop") ){
-    ret = us_stop( unit );
-  }else if( !strcmp(argv[2],"restart") ){
-    ret = us_stop( unit );
-    if(!ret)
+  if( us_prepare( unit ) ){
+
+    if( !strcmp(argv[2],"start") ){
       ret = us_start( unit );
-  }else if( !strcmp(argv[2],"status") ){
-    ret = us_print_status( unit );
-  }else if( !strcmp(argv[2],"zap") ){
-    ret = us_zap( unit );
-  }else{
-    fprintf(stderr,"Invalid action\n");
-    ret = 4;
+    }else if( !strcmp(argv[2],"stop") ){
+      ret = us_stop( unit );
+    }else if( !strcmp(argv[2],"restart") ){
+      ret = us_stop( unit );
+      if(!ret)
+        ret = us_start( unit );
+    }else if( !strcmp(argv[2],"status") ){
+      ret = us_print_status( unit );
+    }else if( !strcmp(argv[2],"zap") ){
+      ret = us_zap( unit );
+    }else if( !strcmp(argv[2],"check") ){
+    }else{
+      fprintf(stderr,"Invalid action\n");
+      ret = 4;
+    }
+
   }
 
   FREE_YAML( unitscript, &unit );

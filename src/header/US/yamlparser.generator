@@ -12,25 +12,33 @@ struct us_parser;
 
 #define BLOCK(X,Y) typedef struct us_ ## X us_ ## X ## _t;
 #define ENTRY(X,Y,Z)
+#define PRIVATE(...)
 PARSABLE_STRUCTURES
+#undef PRIVATE
 #undef ENTRY
 #undef BLOCK
 
 #define BLOCK(X,Y) struct us_ ## X {US_UNPACK Y};
 #define ENTRY(X,Y,Z) us_ ## X ## _t* Z;
+#define PRIVATE(...) __VA_ARGS__
 PARSABLE_STRUCTURES
+#undef PRIVATE
 #undef ENTRY
 #undef BLOCK
 
 #define BLOCK(X,Y) bool parse_yaml_ ## X( struct us_parser*, us_ ## X ## _t** );
 #define ENTRY(X,Y,Z)
+#define PRIVATE(...)
 PARSABLE_STRUCTURES
+#undef PRIVATE
 #undef ENTRY
 #undef BLOCK
 
 #define BLOCK(X,Y) void free_yaml_ ## X( us_ ## X ## _t** );
 #define ENTRY(X,Y,Z)
+#define PRIVATE(...)
 PARSABLE_STRUCTURES
+#undef PRIVATE
 #undef ENTRY
 #undef BLOCK
 
@@ -39,10 +47,12 @@ PARSABLE_STRUCTURES
 bool parse_yaml(FILE* file, void** ret, bool(*)(struct us_parser* s, void** ret), void(*)(void** ret) );
 
 bool parse_yaml_string( struct us_parser* s, us_string_t** ch );
+bool parse_yaml_integer( struct us_parser* s, us_integer_t** ch );
 bool parse_yaml_map( struct us_parser* s, us_map_t** ch );
 bool parse_yaml_skip_unknown_mapping( struct us_parser* s );
 
 void free_yaml_string( us_string_t** ch );
+void free_yaml_integer( us_integer_t** ch );
 void free_yaml_map( us_map_t** ch );
 
 #ifndef PARSE_YAML
@@ -182,8 +192,11 @@ typedef struct us_parser {
     return true; \
   }
 
+#define PRIVATE(...)
+
 PARSABLE_STRUCTURES
 
+#undef PRIVATE
 #undef BLOCK
 #undef ENTRY
 
@@ -196,9 +209,11 @@ PARSABLE_STRUCTURES
 }
 
 #define ENTRY(X,Y,Z) free_yaml_ ## X(&c->Z);
+#define PRIVATE(...)
 
 PARSABLE_STRUCTURES
 
+#undef PRIVATE
 #undef ENTRY
 #undef BLOCK
 

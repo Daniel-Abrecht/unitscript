@@ -5,6 +5,8 @@
 
 #define US_UNPACK(...) __VA_ARGS__
 
+typedef long us_integer_t;
+
 typedef struct us_string {
   char* data;
   size_t length;

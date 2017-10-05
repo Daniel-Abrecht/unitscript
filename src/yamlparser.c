@@ -1,7 +1,41 @@
 #define US_YAML_PARSER_INTERNALS
 
 #include <stdio.h>
+#include <limits.h>
+#include <errno.h>
 #include <US/yamlparser.generator>
+
+void free_yaml_integer( us_integer_t** ch ){
+  if(!*ch) return;
+  free(*ch);
+  *ch = 0;
+}
+
+bool parse_yaml_integer( struct us_parser* s, us_integer_t** ch ){
+  us_integer_t* c = malloc(sizeof(us_integer_t));
+  if(!c){
+    perror("malloc failed");
+    s->done = true;
+    return false;
+  }
+  char* end = 0;
+  long l = strtol(s->value, &end, 0);
+  if( !s->length || (size_t)(end-s->value) != s->length ){
+    fprintf(stderr,"Couldn't parse number: %.*s\n",(int)s->length,s->value);
+    s->done = true;
+    free(c);
+    return false;
+  }
+  if( ( l == LONG_MIN || l == LONG_MAX ) && errno == ERANGE ){
+    fprintf(stderr,"Number out of range: %.*s\n",(int)s->length,s->value);
+    s->done = true;
+    free(c);
+    return false;
+  }
+  *ch = c;
+  *c = l;
+  return true;
+}
 
 void free_yaml_string( us_string_t** ch ){
   us_string_t* c = *ch;
@@ -100,6 +134,8 @@ bool parse_yaml_map( struct us_parser* s, us_map_t** ch ){
       case YAML_BLOCK_MAPPING_START_TOKEN: {
         fprintf(stderr,"Expected <key>:<value> list\n");
         s->done = true;
+        if(key)
+          free(key);
         return false;
       } break;
       case YAML_BLOCK_END_TOKEN: {

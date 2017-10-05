@@ -2,13 +2,23 @@
 #define US_UNITSCRIPT_TEMPLATE
 
 #include <stdbool.h>
+#include <sys/types.h>
+
+struct passwd;
+struct group;
 
 #define PARSABLE_STRUCTURES \
   BLOCK( unitscript, ( \
     ENTRY( string, "user", user ) \
+    ENTRY( integer, "uid", uid ) \
     ENTRY( string, "group", group ) \
+    ENTRY( integer, "gid", gid ) \
     ENTRY( map, "env", env ) \
     ENTRY( string, "program", program ) \
+    PRIVATE( \
+      struct passwd* userinfo; \
+      struct group* groupinfo; \
+    ) \
   ))
 
 #include <US/yamlparser.generator>
