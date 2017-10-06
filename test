@@ -17,6 +17,5 @@ env:
 
 program: |
   #!/bin/bash
-  echo test
   id
-
+  env

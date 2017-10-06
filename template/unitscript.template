@@ -13,11 +13,14 @@ struct group;
     ENTRY( integer, "uid", uid ) \
     ENTRY( string, "group", group ) \
     ENTRY( integer, "gid", gid ) \
+    ENTRY( string, "type", type ) \
     ENTRY( map, "env", env ) \
     ENTRY( string, "program", program ) \
     PRIVATE( \
       struct passwd* userinfo; \
       struct group* groupinfo; \
+      gid_t* member_groups; \
+      size_t member_groups_count; \
     ) \
   ))
 

@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <US/unitscript.h>
 
 int main( int argc, const char* argv[] ){
+
   if( argc < 2 ){
     fprintf(stderr,"Usage: %s file {start,stop,status,restart,zap,check}\n",argv[0]);
     return 1;
@@ -53,7 +56,7 @@ int main( int argc, const char* argv[] ){
 
   }
 
-  FREE_YAML( unitscript, &unit );
+  us_free(unit);
 
   return ret;
 }
