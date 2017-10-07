@@ -9,7 +9,6 @@
 
 
 int us_syslog_redirect( struct us_unitscript* unit, int priority ){
-
   int fds[2];
 
   if( pipe(fds) ){
@@ -37,6 +36,7 @@ int us_syslog_redirect( struct us_unitscript* unit, int priority ){
     file++;
   }
   openlog(file,0,LOG_DAEMON);
+  us_free(unit);
 
   do {
     char msg[1024*4];
@@ -47,6 +47,5 @@ int us_syslog_redirect( struct us_unitscript* unit, int priority ){
     if(i) syslog( priority, "%s", msg );
   } while(ret);
 
-  us_free(unit);
   exit(0);
 }
