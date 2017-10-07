@@ -10,12 +10,10 @@
 ### END INIT INFO
 
 user: daniel
-
-env:
-  test: 123
-  abc: def
+start check: notification
+notifyfd: 4
 
 program: |
-  #!/bin/bash
-  id
-  env
+  sleep 2
+  echo >&4
+  sleep 2

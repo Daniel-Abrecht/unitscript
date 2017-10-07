@@ -34,8 +34,6 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
     perror("pipe failed");
     return 11;
   }
-  fcntl(pfds[0],F_SETFD,FD_CLOEXEC);
-  fcntl(pfds[1],F_SETFD,FD_CLOEXEC);
 
   int fres = fork();
   if( fres == -1 ){
@@ -47,10 +45,10 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
     char c = 0;
     int rres;
     bool out = false;
-    while( ( (rres = read(fd,&c,1)) == -1 && errno == EINTR ) || ( rres != 0 && c != '\n' ) )
+    while( ( (rres = read(fd,&c,1)) == -1 && errno == EINTR ) || ( rres == 1 && c != '\n' ) )
       out = true;
     if( out && c != '\n' ){
-      waitpid(fres,&ret,0);
+      while( waitpid(fres,&ret,0) == -1 && errno == EINTR );
       if(WIFEXITED(ret))
         ret = WEXITSTATUS(ret);
     }
@@ -62,18 +60,28 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
 
   fd = pfds[1];
   close(pfds[0]);
+  int openfdmax = sysconf(_SC_OPEN_MAX);
+  for( int fdi=3; fdi<openfdmax; fdi++ )
+    if( fdi != fd )
+      close(fdi);
 
-  if( setgid(unit->groupinfo->gr_gid) ){
-    perror("setgid failed");
-    return 16;
-  }
-  if( setgroups(unit->member_groups_count,unit->member_groups) ){
-    perror("setgroups failed");
+  if( unit->groupinfo->gr_gid != getgid() ){
+    if( setgroups(unit->member_groups_count,unit->member_groups) ){
+      perror("setgroups failed");
+      ret = 15;
+      goto error;
+    }
+    if( setgid(unit->groupinfo->gr_gid) ){
+      perror("setgid failed");
+      ret = 16;
+      goto error;
+    }
   }
 
   if( setuid(unit->userinfo->pw_uid) ){
     perror("setuid failed");
-    return 15;
+    ret = 17;
+    goto error;
   }
 
   clearenv();
@@ -86,6 +94,7 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
       );
 
   ret = (*func)(param);
+error:
   if( ret )
     write(fd,"!",1);
   close(fd);
@@ -123,11 +132,6 @@ int us_exec( us_string_t* program ){
   if( argument )
     *(argument++) = 0;
 
-  int openfdmax = sysconf(_SC_OPEN_MAX);
-  for( int fdi=3; fdi<openfdmax; fdi++ )
-    if( fdi != fd )
-      close(fdi);
-
   if(argument){
     ret = execlp(shell,shell,argument,"/dev/stdin",0);
   }else{
@@ -139,6 +143,23 @@ int us_exec( us_string_t* program ){
   free(shell);
   close(0);
   return 4;
+}
+
+void us_wait_exit(void){
+  write(fd,"+",1);
+  close(fd);
+}
+
+void us_wait_start(void){
+  fcntl(fd,F_SETFD,FD_CLOEXEC);
+}
+
+void us_wait_notification(int x){
+  if( x != fd ){
+    dup2(fd,x);
+    close(fd);
+    fd = x;
+  }
 }
 
 char* us_get_shell(const char* prog){

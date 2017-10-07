@@ -7,6 +7,20 @@
 struct passwd;
 struct group;
 
+enum startcheck {
+  STARTCHECK_UNKNOWN,
+  STARTCHECK_EXIT,
+  STARTCHECK_START,
+  STARTCHECK_NOTIFICATION
+};
+
+enum us_logging {
+  US_LOGGING_DEFAULT,
+  US_LOGGING_STDIO,
+  US_LOGGING_SYSLOG,
+  US_LOGGING_NONE
+};
+
 #define PARSABLE_STRUCTURES \
   BLOCK( unitscript, ( \
     ENTRY( string, "user", user ) \
@@ -14,13 +28,19 @@ struct group;
     ENTRY( string, "group", group ) \
     ENTRY( integer, "gid", gid ) \
     ENTRY( string, "type", type ) \
+    ENTRY( string, "start check", startcheck_str ) \
+    ENTRY( integer, "notifyfd", notifyfd ) \
+    ENTRY( string, "logging", logging_str ) \
     ENTRY( map, "env", env ) \
     ENTRY( string, "program", program ) \
     PRIVATE( \
+      const char* file; \
       struct passwd* userinfo; \
       struct group* groupinfo; \
       gid_t* member_groups; \
       size_t member_groups_count; \
+      enum startcheck startcheck; \
+      enum us_logging logging; \
     ) \
   ))
 

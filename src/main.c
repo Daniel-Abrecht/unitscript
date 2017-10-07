@@ -8,6 +8,8 @@
 
 int main( int argc, const char* argv[] ){
 
+  umask(0377);
+
   if( argc < 2 ){
     fprintf(stderr,"Usage: %s file {start,stop,status,restart,zap,check}\n",argv[0]);
     return 1;
@@ -31,6 +33,8 @@ int main( int argc, const char* argv[] ){
     return 3;
   }
   fclose(file);
+
+  unit->file = argv[1];
 
   int ret = 0;
 
