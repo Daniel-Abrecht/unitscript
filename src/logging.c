@@ -47,5 +47,6 @@ int us_syslog_redirect( struct us_unitscript* unit, int priority ){
     if(i) syslog( priority, "%s", msg );
   } while(ret);
 
+  us_free(unit);
   exit(0);
 }
