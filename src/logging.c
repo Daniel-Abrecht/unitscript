@@ -27,7 +27,11 @@ int us_syslog_redirect( struct us_unitscript* unit, int priority ){
     close(fds[0]);
     return fds[1];
   }
-  close(fds[1]);
+
+  int openfdmax = sysconf(_SC_OPEN_MAX);
+  for( int fdi=0; fdi<openfdmax; fdi++ )
+    if( fdi != fds[0] )
+      close(fdi);
 
   const char* file = strrchr(unit->file,'/');
   if(!file){

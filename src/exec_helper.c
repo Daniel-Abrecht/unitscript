@@ -57,10 +57,14 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
   }
 
   role = EXEC_ENV_ROLE_CHILD;
-
-  fd = pfds[1];
   close(pfds[0]);
   int openfdmax = sysconf(_SC_OPEN_MAX);
+  if( dup2(pfds[1],openfdmax-1) != -1 ){
+    close(pfds[1]);
+    pfds[1] = fd = openfdmax - 1;
+  }else{
+    fd = pfds[1];
+  }
   for( int fdi=3; fdi<openfdmax; fdi++ )
     if( fdi != fd )
       close(fdi);

@@ -1,0 +1,22 @@
+#!/bin/unitscript
+### BEGIN INIT INFO
+# Provides:          lightdm
+# Should-Start:      console-screen kbd acpid dbus hal consolekit
+# Required-Start:    $local_fs $remote_fs x11-common
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Light Display Manager
+# Description:       Debian init script for the Light Display Manager
+### END INIT INFO
+
+user: root
+start check: start
+
+program: |
+  . /etc/profile
+  if [ -r /etc/default/locale ]; then
+    . /etc/default/locale
+    export LANG LANGUAGE
+  fi
+  exec lightdm
