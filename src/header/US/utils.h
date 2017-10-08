@@ -6,6 +6,7 @@
 #define US_UNPACK(...) __VA_ARGS__
 
 typedef long us_integer_t;
+typedef bool us_boolean_t;
 
 typedef struct us_string {
   char* data;

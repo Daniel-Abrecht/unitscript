@@ -11,6 +11,33 @@ void free_yaml_integer( us_integer_t** ch ){
   *ch = 0;
 }
 
+void free_yaml_boolean( us_boolean_t** ch ){
+  if(!*ch) return;
+  free(*ch);
+  *ch = 0;
+}
+
+bool parse_yaml_boolean( struct us_parser* s, us_boolean_t** ch ){
+  us_boolean_t* c = malloc(sizeof(us_integer_t));
+  if(!c){
+    perror("malloc failed");
+    s->done = true;
+    return false;
+  }
+  if( !strcmp(s->value,"yes") ){
+    *c = true;
+  }else if( !strcmp(s->value,"no") ){
+    *c = false;
+  }else{
+    fprintf(stderr,"Expected 'yes' or 'no'\n");
+    s->done = true;
+    free(c);
+    return false;
+  }
+  *ch = c;
+  return true;
+}
+
 bool parse_yaml_integer( struct us_parser* s, us_integer_t** ch ){
   us_integer_t* c = malloc(sizeof(us_integer_t));
   if(!c){

@@ -2,13 +2,56 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <US/unitscript.h>
 
+const char piddir[] = "/var/run/unitscript";
+
+bool us_init(void){
+  struct stat s;
+  int ret;
+
+  umask(0177);
+
+  ret = stat(piddir,&s);
+  if( ret == -1 ){
+    if( errno == ENOENT && getuid() == 0 && getgid() == 0 ){
+      umask(0);
+      mkdir(piddir,01777);
+      umask(0177);
+      ret = stat(piddir,&s);
+    }
+    if( ret == -1  ){
+      fprintf( stderr, "stat for %s failed, please create the directory with uid 0, gid 0 and mode 01777 or run the unitscript executable as root: %d: %s\n", piddir, errno, strerror(errno) );
+      return false;
+    }
+  }
+
+  if( ( s.st_mode & 07777 ) != 01777 ){
+    fprintf( stderr, "Permission of directory %s set incorrectly, expected 01777, got %o\n", piddir, s.st_mode & 07777 );
+    return false;
+  }
+
+  if( s.st_uid != 0 ){
+    fprintf( stderr, "uid of directory %s set incorrectly, expected 0, got %d\n", piddir, s.st_uid );
+    return false;
+  }
+
+  if( s.st_gid != 0 ){
+    fprintf( stderr, "gid of directory %s set incorrectly, expected 0, got %d\n", piddir, s.st_gid );
+    return false;
+  }
+
+  return true;
+}
+
 int main( int argc, const char* argv[] ){
 
-  umask(0377);
+  if( !us_init() )
+    return 1;
 
   if( argc < 2 ){
     fprintf(stderr,"Usage: %s file {start,stop,status,restart,zap,check}\n",argv[0]);

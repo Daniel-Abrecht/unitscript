@@ -124,6 +124,12 @@ int us_prepare( us_unitscript_t* unit ){
     goto failed_after_getgr;
   }
 
+  static const char logging_info[] = {
+    "  default: equivalent to syslog if 'start check' is 'start', stdout if 'start check' is 'exit', invalid otherwise\n"
+    "  syslog: redirect stdout and stderr to syslog before executing 'program'\n"
+    "  stdio: keep stdout and stderr unchanged\n"
+    "  none: close stdout and stderr before execution\n"
+  };
 
   if( unit->logging_str ){
     struct {
@@ -144,13 +150,7 @@ int us_prepare( us_unitscript_t* unit ){
       break;
     }
     if( !found ){
-      fprintf(stderr,
-        "Unsupported 'logging' mode. Can be one of:\n"
-        "  default: equivalent to syslog if 'start check' is 'start', stdout otherwise\n"
-        "  syslog: redirect stdout and stderr to syslog before executing 'program'\n"
-        "  stdio: keep stdout and stderr unchanged\n"
-        "  none: close stdout and stderr before execution\n"
-      );
+      fprintf( stderr, "Unsupported 'logging' mode. Can be one of:\n%s", logging_info );
       goto failed_after_getgr;
     }
   }
@@ -160,9 +160,66 @@ int us_prepare( us_unitscript_t* unit ){
       case STARTCHECK_START: {
         unit->logging = US_LOGGING_SYSLOG;
       } break;
-      case STARTCHECK_NOTIFICATION:
+      case STARTCHECK_NOTIFICATION: {
+        fprintf( stderr, "'logging' mode 'default' invalid for 'start check' 'notification'. Can be one of:\n%s", logging_info );
+      }
       case STARTCHECK_EXIT: {
         unit->logging = US_LOGGING_STDIO;
+      } break;
+      case STARTCHECK_UNKNOWN: break;
+    }
+  }
+
+  if( !unit->pidfile ){
+    unit->pidfile = malloc(sizeof(*unit->pidfile));
+    if( !unit->pidfile ){
+      perror("malloc failed");
+      goto failed_after_getgr;
+    }
+    const char* name = strrchr(unit->file,'/');
+    if( !name ){
+      name = unit->file;
+    }else{
+      name++;
+    }
+    unit->pidfile->length = strlen(piddir) + strlen(name) + 5;
+    unit->pidfile->data = malloc( unit->pidfile->length + 1 );
+    if( !unit->pidfile->data ){
+      perror("malloc failed");
+      free(unit->pidfile);
+      unit->pidfile = 0;
+      goto failed_after_getgr;
+    }
+    snprintf(unit->pidfile->data,unit->pidfile->length+1,"%s/%s.pid",piddir,name);
+    unit->pidfile->data[unit->pidfile->length] = 0;
+  }
+
+  if( !unit->manage_pidfile ){
+    switch( unit->startcheck ){
+      case STARTCHECK_NOTIFICATION: {
+        fprintf(stderr,
+          "'manage pidfile' must be specified for 'start check' 'notification'. "
+          "Valid values are 'yes' or 'no'. "
+          "Default for 'start check' 'exit' is 'no'. "
+          "Default for 'start check' 'start' is 'yes'. \n"
+        );
+        goto failed_after_getgr;
+      } break;
+      case STARTCHECK_EXIT: {
+        unit->manage_pidfile = malloc(sizeof(*unit->manage_pidfile));
+        if(!unit->manage_pidfile){
+          perror("malloc failed");
+          goto failed_after_getgr;
+        }
+        *unit->manage_pidfile = false;
+      } break;
+      case STARTCHECK_START: {
+        unit->manage_pidfile = malloc(sizeof(*unit->manage_pidfile));
+        if(!unit->manage_pidfile){
+          perror("malloc failed");
+          goto failed_after_getgr;
+        }
+        *unit->manage_pidfile = true;
       } break;
       case STARTCHECK_UNKNOWN: break;
     }

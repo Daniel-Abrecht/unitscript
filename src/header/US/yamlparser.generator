@@ -48,11 +48,13 @@ bool parse_yaml(FILE* file, void** ret, bool(*)(struct us_parser* s, void** ret)
 
 bool parse_yaml_string( struct us_parser* s, us_string_t** ch );
 bool parse_yaml_integer( struct us_parser* s, us_integer_t** ch );
+bool parse_yaml_boolean( struct us_parser* s, us_boolean_t** ch );
 bool parse_yaml_map( struct us_parser* s, us_map_t** ch );
 bool parse_yaml_skip_unknown_mapping( struct us_parser* s );
 
 void free_yaml_string( us_string_t** ch );
 void free_yaml_integer( us_integer_t** ch );
+void free_yaml_boolean( us_boolean_t** ch );
 void free_yaml_map( us_map_t** ch );
 
 #ifndef PARSE_YAML

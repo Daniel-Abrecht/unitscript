@@ -92,6 +92,7 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
         unit->env->entries[i].value.data,
         true
       );
+  setenv("PIDFILE",unit->pidfile->data,true);
 
   ret = (*func)(param);
 error:

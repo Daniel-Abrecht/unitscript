@@ -31,6 +31,8 @@ enum us_logging {
     ENTRY( string, "start check", startcheck_str ) \
     ENTRY( integer, "notifyfd", notifyfd ) \
     ENTRY( string, "logging", logging_str ) \
+    ENTRY( string, "pidfile", pidfile ) \
+    ENTRY( boolean, "manage pidfile", manage_pidfile ) \
     ENTRY( map, "env", env ) \
     ENTRY( string, "program", program ) \
     PRIVATE( \

@@ -4,7 +4,7 @@ SRC = src
 BIN = bin/unitscript
 TEMPLATE = template
 
-LIBS += -lyaml
+LIBS += -lyaml -lbsd
 
 INCLUDES += -I$(SRC)/header/
 INCLUDES += -I$(TEMPLATE)

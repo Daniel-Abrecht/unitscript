@@ -1,6 +1,8 @@
+#define _DEFAULT_SOURCE
+#include <errno.h>
 #include <syslog.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include <bsd/libutil.h>
 #include <US/logging.h>
 #include <US/exec_helper.h>
 #include <US/unitscript.h>
@@ -19,6 +21,25 @@ static int start_exec( void* x ){
       us_wait_notification(unit->notifyfd ? *unit->notifyfd : 3);
     } break;
     case STARTCHECK_UNKNOWN: return 1;
+  }
+
+  struct pidfh * pfh = 0;
+  if( *unit->manage_pidfile ){
+    pid_t otherpid;
+    while( true ){
+      pfh = pidfile_open( unit->pidfile->data, 0600, &otherpid );
+      if( !pfh ){
+        if( errno == EAGAIN ){
+          usleep(100000); // 0.1s
+          continue;
+        }else if( errno == EEXIST ){
+          fprintf( stderr, "Already running with pid %d\n", otherpid );
+        }else{
+          perror( "pidfile_open failed" );
+        }
+        return 2;
+      }else break;
+    }
   }
 
   switch( unit->logging ){
@@ -41,10 +62,17 @@ static int start_exec( void* x ){
       close(1);
       close(2);
     } break;
-    case US_LOGGING_DEFAULT: return 2;
+    case US_LOGGING_DEFAULT: return 3;
   }
 
-  return us_exec(unit->program);
+  pidfile_write(pfh);
+
+  int ret = us_exec(unit->program);
+
+  if(pfh)
+    pidfile_remove(pfh);
+
+  return ret;
 }
 
 int us_start( us_unitscript_t* unit ){
