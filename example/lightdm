@@ -14,9 +14,8 @@ user: root
 start check: start
 
 program: |
-  . /etc/profile
   if [ -r /etc/default/locale ]; then
     . /etc/default/locale
     export LANG LANGUAGE
   fi
-  exec lightdm
+  exec /usr/sbin/lightdm

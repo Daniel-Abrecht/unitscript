@@ -6,6 +6,7 @@
 #include <grp.h>
 #include <wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -97,8 +98,13 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
         true
       );
   setenv("PIDFILE",unit->pidfile->data,true);
+  setenv("HOME",unit->userinfo->pw_dir,false);
+  setenv("SHELL",unit->userinfo->pw_shell,false);
+
+  umask(*unit->umask);
 
   ret = (*func)(param);
+
 error:
   if( ret )
     write(fd,"!",1);
@@ -188,7 +194,7 @@ char* us_get_shell(const char* prog){
   }
 
   if(!shell)
-    shell = strdup("sh");
+    shell = strdup("sh -l");
 
   return shell;
 }

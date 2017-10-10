@@ -1,6 +1,9 @@
 #define _DEFAULT_SOURCE
 #include <errno.h>
 #include <syslog.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <bsd/libutil.h>
 #include <US/logging.h>
@@ -10,6 +13,8 @@
 static int start_exec( void* x ){
   us_unitscript_t* unit = x;
 
+  umask(0177);
+
   switch( unit->startcheck ){
     case STARTCHECK_EXIT: {
       us_wait_exit();
@@ -18,7 +23,11 @@ static int start_exec( void* x ){
       us_wait_start();
     } break;
     case STARTCHECK_NOTIFICATION: {
-      us_wait_notification(unit->notifyfd ? *unit->notifyfd : 3);
+      int nfd = unit->notifyfd ? *unit->notifyfd : 3;
+      us_wait_notification(nfd);
+      char val[32];
+      snprintf(val,sizeof(val),"%d",nfd);
+      setenv("NOTIFICATION_FD",val,true);
     } break;
     case STARTCHECK_UNKNOWN: return 1;
   }
@@ -67,6 +76,7 @@ static int start_exec( void* x ){
 
   pidfile_write(pfh);
 
+  umask(*unit->umask);
   int ret = us_exec(unit->program);
 
   if(pfh)

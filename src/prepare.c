@@ -225,6 +225,15 @@ int us_prepare( us_unitscript_t* unit ){
     }
   }
 
+  if( !unit->umask ){
+    unit->umask = malloc(sizeof(*unit->umask));
+    if( !unit->umask ){
+      perror("malloc failed");
+      goto failed_after_getgr;
+    }
+    *unit->umask = 0022;
+  }
+
   return true;
 failed_after_getgr:
   free(grmemory);

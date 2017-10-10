@@ -33,6 +33,7 @@ enum us_logging {
     ENTRY( string, "logging", logging_str ) \
     ENTRY( string, "pidfile", pidfile ) \
     ENTRY( boolean, "manage pidfile", manage_pidfile ) \
+    ENTRY( integer, "umask", umask ) \
     ENTRY( map, "env", env ) \
     ENTRY( string, "program", program ) \
     PRIVATE( \
