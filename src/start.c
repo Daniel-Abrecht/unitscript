@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pwd.h>
 #include <unistd.h>
 #include <bsd/libutil.h>
 #include <US/logging.h>
@@ -72,6 +73,12 @@ static int start_exec( void* x ){
       close(2);
     } break;
     case US_LOGGING_DEFAULT: return 3;
+  }
+
+  if( unit->working_directory ){
+    chdir( unit->working_directory->data );
+  }else{
+    chdir( unit->userinfo->pw_dir );
   }
 
   pidfile_write(pfh);

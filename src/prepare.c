@@ -96,7 +96,7 @@ int us_prepare( us_unitscript_t* unit ){
   static const char startcheck_info[] = {
     "  exit: The process forks itself, wait until it exits and check the return code\n"
     "  start: The moment the executable is executed is considered a successful start\n"
-    "  notification: The process writes to a newline to a file descriptor to indicate the start succeeded. You can specify the file descriptor using the notifyfd property, default is 3\n"
+    "  notification: The process writes a newline to a file descriptor to indicate the start succeeded. You can specify the file descriptor using the notifyfd property, default is 3\n"
   };
 
   if( !unit->startcheck_str ){

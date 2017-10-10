@@ -27,13 +27,13 @@ enum us_logging {
     ENTRY( integer, "uid", uid ) \
     ENTRY( string, "group", group ) \
     ENTRY( integer, "gid", gid ) \
-    ENTRY( string, "type", type ) \
     ENTRY( string, "start check", startcheck_str ) \
     ENTRY( integer, "notifyfd", notifyfd ) \
     ENTRY( string, "logging", logging_str ) \
     ENTRY( string, "pidfile", pidfile ) \
     ENTRY( boolean, "manage pidfile", manage_pidfile ) \
     ENTRY( integer, "umask", umask ) \
+    ENTRY( string, "working directory", working_directory ) \
     ENTRY( map, "env", env ) \
     ENTRY( string, "program", program ) \
     PRIVATE( \
