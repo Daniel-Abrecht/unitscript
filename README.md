@@ -1,9 +1,9 @@
 # unitscript
 
 This program can be used as an interpreter for unitscripts, which are yaml based init scripts.
-Unitscripts could be used as easier alternative to shell scripts as init scripts or to standardize init scripts
-across many different sysv-rc compatible distributions. This project was created to show how create something
-similar to systemd units which could be used to standardize init scripts across distributions but using
+Unitscripts could be used as easier alternative to shell scripts as init scripts or to standardise init scripts
+across many different sysv-rc compatible distributions. This project was created to show how to create something
+similar to systemd units which could be used to standardise init scripts across distributions but using
 existing technologies and without imposing a system which has since grown way bayond any reasonable scope on everybody.
 
 This project does only provide some basic functionality to start and stop programs at the moment and may be extendet
