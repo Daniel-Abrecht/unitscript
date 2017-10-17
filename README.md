@@ -39,7 +39,7 @@ The following unitscript options are currently supported:
 | notifyfd    | integer | Used if ```start check``` is set to notification. Default is 3. |
 | logging     | string  | If and how stdout and stdin should be redirected. Can be either: default, syslog, stdio or none. <br/> default: equivalent to syslog if 'start check' is 'start', stdout if 'start check' is 'exit', invalid otherwise. <br/> syslog: redirect stdout and stderr to syslog before executing 'program'. <br/> stdio: keep stdout and stderr unchanged <br/> none: close stdout and stderr before execution. |
 | pidfile     | string  | Defaults to /var/run/unitscript/<script name>.pid |
-| manage pidfile | boolean | Either yes or no. Defaults to yes. Specifies if the program or the unit script should create the pid file. |
+| manage pidfile | boolean | Either yes or no. Specifies if the program or the unit script should create the pid file. <br/> Default for 'start check' 'exit' is 'no'. <br/> Default for 'start check' 'start' is 'yes'. |
 | env         | map     | Environment variables to set before program execution |
 | working directory | string | Sets the working directory. Defaults to the user home directory. |
 | umask       | integer | The umask using which the program is started, defaults to 0022 |
