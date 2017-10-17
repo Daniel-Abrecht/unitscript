@@ -16,7 +16,7 @@ int us_syslog_redirect( struct us_unitscript* unit, int priority ){
     return -1;
   }
 
-  int ret = fork();
+  pid_t ret = fork();
   if( ret == -1 ){
     perror("fork failed\n");
     close(fds[0]);

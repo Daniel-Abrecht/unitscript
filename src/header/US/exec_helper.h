@@ -1,6 +1,8 @@
 #ifndef US_EXEC_HELPER_H
 #define US_EXEC_HELPER_H
 
+#include <stdbool.h>
+
 struct us_unitscript;
 struct us_string;
 
@@ -10,5 +12,6 @@ int us_exec( struct us_string* program );
 void us_wait_exit(void);
 void us_wait_start(void);
 void us_wait_notification(int x);
+bool us_exec_env_script( const char* script );
 
 #endif

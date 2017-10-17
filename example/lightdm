@@ -7,15 +7,13 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Light Display Manager
-# Description:       Debian init script for the Light Display Manager
+# Description:       Unitscript for the Light Display Manager
 ### END INIT INFO
 
 user: root
 start check: start
 
-program: |
-  if [ -r /etc/default/locale ]; then
-    . /etc/default/locale
-    export LANG LANGUAGE
-  fi
-  exec /usr/sbin/lightdm
+env scripts:
+  - /etc/default/locale
+
+program: exec /usr/sbin/lightdm

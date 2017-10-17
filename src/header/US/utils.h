@@ -18,6 +18,11 @@ typedef struct us_map_entry {
   us_string_t value;
 } us_map_entry_t;
 
+typedef struct us_list {
+  us_string_t* entries;
+  size_t length;
+} us_list_t;
+
 typedef struct us_map_t {
   us_map_entry_t* entries;
   size_t length;

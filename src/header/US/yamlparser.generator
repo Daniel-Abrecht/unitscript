@@ -50,12 +50,14 @@ bool parse_yaml_string( struct us_parser* s, us_string_t** ch );
 bool parse_yaml_integer( struct us_parser* s, us_integer_t** ch );
 bool parse_yaml_boolean( struct us_parser* s, us_boolean_t** ch );
 bool parse_yaml_map( struct us_parser* s, us_map_t** ch );
+bool parse_yaml_list( struct us_parser* s, us_list_t** ch );
 bool parse_yaml_skip_unknown_mapping( struct us_parser* s );
 
 void free_yaml_string( us_string_t** ch );
 void free_yaml_integer( us_integer_t** ch );
 void free_yaml_boolean( us_boolean_t** ch );
 void free_yaml_map( us_map_t** ch );
+void free_yaml_list( us_list_t** ch );
 
 #ifndef PARSE_YAML
 #define PARSE_YAML( T, file, R ) \
@@ -77,7 +79,8 @@ void free_yaml_map( us_map_t** ch );
 enum parser_state {
   PARSER_STATE_KEY,
   PARSER_STATE_VALUE,
-  PARSER_STATE_MAPPING
+  PARSER_STATE_MAPPING,
+  PARSER_STATE_SEQUENCE
 };
 
 typedef struct us_parser {
@@ -161,6 +164,10 @@ typedef struct us_parser {
             next = true; \
           } \
         } break; \
+        case YAML_BLOCK_SEQUENCE_START_TOKEN: { \
+          s->state = PARSER_STATE_SEQUENCE; \
+          next = true; \
+        } break; \
         case YAML_BLOCK_MAPPING_START_TOKEN: { \
           s->state = PARSER_STATE_MAPPING; \
           next = true; \
@@ -171,7 +178,7 @@ typedef struct us_parser {
         default: break; \
       } \
       \
-      if( next && ( s->state == PARSER_STATE_MAPPING || s->state == PARSER_STATE_VALUE ) ){ \
+      if( next ){ \
         US_UNPACK Y { \
           fprintf(stderr,"Warning: unknown key %.*s\n",(int)length,key); \
           if( s->state == PARSER_STATE_MAPPING ){ \

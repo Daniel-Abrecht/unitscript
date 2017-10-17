@@ -89,6 +89,17 @@ void free_yaml_map( us_map_t** ch ){
   free(c);
 }
 
+void free_yaml_list( us_list_t** ch ){
+  us_list_t* c = *ch;
+  if(!c) return;
+  *ch = 0;
+  while(c->length--)
+    free(c->entries[c->length].data);
+  if( c->entries )
+    free(c->entries);
+  free(c);
+}
+
 bool parse_yaml_string( us_parser_t* s, us_string_t** ch ){
   if( s->state != PARSER_STATE_VALUE )
     return true;
@@ -171,7 +182,7 @@ bool parse_yaml_map( struct us_parser* s, us_map_t** ch ){
       default: break;
     }
 
-    if( next && s->state == PARSER_STATE_VALUE ){
+    if( next ){
       us_map_entry_t* el = realloc( c->entries, (c->length+1) * sizeof(us_map_entry_t) );
       if(!el){
         perror("realloc failed");
@@ -202,6 +213,86 @@ bool parse_yaml_map( struct us_parser* s, us_map_t** ch ){
 
   if(key)
     free( key );
+
+  return true;
+}
+
+bool parse_yaml_list( struct us_parser* s, us_list_t** ch ){
+  yaml_token_t token;
+
+  if( s->state != PARSER_STATE_SEQUENCE )
+    return false;
+
+  bool done = false;
+
+  us_list_t* c = calloc(1,sizeof(us_list_t));
+  if(!c){
+    perror("calloc failed");
+    s->done = true;
+    return false;
+  }
+  *ch = c;
+
+  do {
+
+    if( !yaml_parser_scan(s->parser, &token) ){
+      fprintf(stderr,"yaml_parser_scan failed");
+      s->done = true;
+      return false;
+    }
+
+    bool next = false;
+
+    switch( token.type ){
+      case YAML_KEY_TOKEN: {
+        fprintf(stderr,"Unexpected token YAML_KEY_TOKEN\n");
+        s->done = true;
+        return false;
+      } break;
+      case YAML_VALUE_TOKEN: {
+        s->state = PARSER_STATE_VALUE;
+      } break;
+      case YAML_SCALAR_TOKEN: {
+        s->value = (const char*)token.data.scalar.value;
+        s->length = token.data.scalar.length;
+        next = true;
+      } break;
+      case YAML_BLOCK_MAPPING_START_TOKEN: {
+        fprintf(stderr,"Expected <key>:<value> list\n");
+        s->done = true;
+        return false;
+      } break;
+      case YAML_BLOCK_END_TOKEN: {
+        done = true;
+      } break;
+      default: break;
+    }
+
+    if( next ){
+      us_string_t* el = realloc( c->entries, (c->length+1) * sizeof(us_string_t) );
+      if(!el){
+        perror("realloc failed");
+        s->done = true;
+        return false;
+      }
+      c->entries = el;
+      us_string_t* e = el + c->length;
+      e->length = 0;
+      c->length++;
+      e->data = malloc(s->length+1);
+      if(!e->data){
+        perror("malloc failed");
+        s->done = true;
+        return false;
+      }
+      memcpy(e->data,s->value,s->length);
+      e->data[s->length] = 0;
+      e->length = s->length;
+    }
+
+    s->done = token.type == YAML_STREAM_END_TOKEN;
+    yaml_token_delete(&token);
+  } while( !s->done && !done );
 
   return true;
 }

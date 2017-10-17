@@ -36,7 +36,7 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
     return 11;
   }
 
-  int fres = fork();
+  pid_t fres = fork();
   if( fres == -1 ){
     close(pfds[0]);
     close(pfds[1]);
@@ -89,7 +89,11 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
     goto error;
   }
 
+
   clearenv();
+  if( unit->env_scripts )
+    for( size_t i=0; i<unit->env_scripts->length; i++ )
+      us_exec_env_script(unit->env_scripts->entries[i].data);
   if( unit->env )
     for( size_t i=0; i<unit->env->length; i++ )
       setenv(
@@ -111,6 +115,72 @@ error:
   close(fd);
   us_free(unit);
   exit(ret);
+}
+
+bool us_exec_env_script( const char* script ){
+  int fds[2];
+  if( pipe(fds) == -1 ){
+    perror("Warning: us_exec_env_script: pipe failed");
+    return false;
+  }
+  pid_t ret = fork();
+  if( ret == -1 ){
+    perror("Warning: us_exec_env_script: fork failed");
+    close(fds[0]);
+    close(fds[1]);
+    return false;
+  }
+  if( ret ){
+    char buf[4096];
+    buf[sizeof(buf)-1] = 0;
+    close(fds[1]);
+    size_t m = 0;
+    while( true ){
+      ssize_t n = read( fds[0], buf+m, sizeof(buf)-1-m );
+      if( n<0 ){
+        if( errno == EAGAIN )
+          continue;
+        perror("Warning: us_exec_env_script: read failed");
+        break;
+      }
+      m += n;
+      buf[m] = 0;
+      while( true ){
+        size_t l = strlen(buf);
+        if( l >= m && n )
+          break;
+        char* value = strchr(buf,'=');
+        if(!value)
+          break;
+        *value = 0;
+        value++;
+        if( setenv(buf,value,true) == -1 )
+          perror("Warning: us_exec_env_script: setenv failed");
+        if( l < m ){
+          memmove(buf,buf+l+1,m-l+1);
+          m -= l + 1;
+        }
+      }
+      if( m > sizeof(buf)-1 ){
+        fprintf(stderr,"Warning: us_exec_env_script: an environment variable was too big\n");
+        break;
+      }
+      if(!n) break;
+    }
+    close(fds[0]);
+    while( waitpid(ret,0,0) == -1 && errno == EAGAIN );
+    return true;
+  }else{
+    close(fds[0]);
+    close(0);
+    if( fds[1] != 1 )
+      dup2(fds[1],1);
+    close(fds[1]);
+    clearenv();
+    execlp("sh","sh","-c","set -a; . \"$1\" >&2; env -0","--",script,0);
+    perror("Warning: us_exec_env_script: exec failed");
+    return false;
+  }
 }
 
 int us_exec( us_string_t* program ){
