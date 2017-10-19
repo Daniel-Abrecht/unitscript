@@ -23,7 +23,7 @@ will never do anything else than managing services.
 
 ## Format
 
-A unitscript consists of the shebang line ```#!/bin/unitscript```, followed by an LSB Header,
+A unitscript consists of the shebang line ```#!/usr/bin/env unitscript```, followed by an LSB Header,
 followed by the unitscript options. The wholeunit script is a valid yaml file.
 
 The following unitscript options are currently supported:
@@ -45,13 +45,13 @@ The following unitscript options are currently supported:
 | env files   | list    | A list of files similar in syntax to /etc/environment. The variables those scripts define will be exported as environment variables before executing the program |
 | working directory | string | Sets the working directory. Defaults to the user home directory. |
 | umask       | integer | The umask using which the program is started, defaults to 0022 |
-
+| rlimits     | map     | All posix rlimits and some system specific ones can be set. The name of the rlimit should be in lower case and shouldn't be prefixed with RLIMIT_. The value for an rlimit can either be an integer, which will set the cur and max rlimit values, or ```max:cur```, where max and cur are integers used to set the max and cur values of the rlimit. |
 
 ## Environment variables
 
 All environment variables will be cleared before execution, but per default a sh login shell is used to start the program,
 which should source /etc/profile and .profile, which may set some basic environment variables like the PATH variable.
-In addition to this, all variables specified using the 'env' option and the following ones will be set:
+In addition to this, all variables specified using the 'env', 'env files' and 'env scripts' option and the following ones will be set:
 
 | variable | description |
 |----------|-------------|
