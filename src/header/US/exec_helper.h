@@ -13,5 +13,6 @@ void us_wait_exit(void);
 void us_wait_start(void);
 void us_wait_notification(int x);
 bool us_exec_env_script( const char* script );
+bool us_read_env_file( const char* file );
 
 #endif

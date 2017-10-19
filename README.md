@@ -41,7 +41,8 @@ The following unitscript options are currently supported:
 | pidfile     | string  | Defaults to /var/run/unitscript/<script name>.pid |
 | manage pidfile | boolean | Either yes or no. Specifies if the program or the unit script should create the pid file. <br/> Default for 'start check' 'exit' is 'no'. <br/> Default for 'start check' 'start' is 'yes'. |
 | env         | map     | Environment variables to set before program execution |
-| env script  | list    | A list of posix shell scripts. The variables those scripts define will be exported as environment variables before executing the program |
+| env scripts | list    | A list of posix shell scripts. The variables those scripts define will be exported as environment variables before executing the program |
+| env files   | list    | A list of files similar in syntax to /etc/environment. The variables those scripts define will be exported as environment variables before executing the program |
 | working directory | string | Sets the working directory. Defaults to the user home directory. |
 | umask       | integer | The umask using which the program is started, defaults to 0022 |
 

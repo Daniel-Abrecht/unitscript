@@ -37,6 +37,7 @@ enum us_logging {
     ENTRY( map, "env", env ) \
     ENTRY( string, "program", program ) \
     ENTRY( list, "env scripts", env_scripts ) \
+    ENTRY( list, "env files", env_files ) \
     PRIVATE( \
       const char* file; \
       struct passwd* userinfo; \

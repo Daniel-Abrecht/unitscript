@@ -91,6 +91,9 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
 
 
   clearenv();
+  if( unit->env_files )
+    for( size_t i=0; i<unit->env_files->length; i++ )
+      us_read_env_file(unit->env_files->entries[i].data);
   if( unit->env_scripts )
     for( size_t i=0; i<unit->env_scripts->length; i++ )
       us_exec_env_script(unit->env_scripts->entries[i].data);
@@ -115,6 +118,71 @@ error:
   close(fd);
   us_free(unit);
   exit(ret);
+}
+
+bool us_read_env_file( const char* file ){
+  int fd = open(file,O_RDONLY);
+  if( fd == -1 )
+    return false;
+  char buf[4096];
+  buf[sizeof(buf)-1] = 0;
+  size_t m = 0;
+  while( true ){
+    ssize_t n = read( fd, buf+m, sizeof(buf)-1-m );
+    if( n<0 ){
+      if( errno == EAGAIN )
+        continue;
+      perror("Warning: us_read_env_file: read failed");
+      break;
+    }
+    m += n;
+    buf[m] = 0;
+    while( m ){
+      char* value = strchr(buf,'=');
+      char* comment = strchr(buf,'#');
+      char* end = strchr(buf,'\n');
+      if( !end && !n ){
+        end = buf + m;
+        m++;
+      }
+      if( ( !comment && !value && end ) || ( comment && comment < value ) || ( end && end < value ) ){
+        if( end ){
+          memmove(buf,end+1,(buf+m)-end+1);
+          m -= end-buf+1;
+          continue;
+        }else{
+          memmove(buf,comment+1,(buf+m)-comment+1);
+          m -= comment-buf+1;
+          break;
+        }
+      }
+      if( !value || ( !end && !comment ) ) break;
+      *value = 0;
+      if( comment && ( !end || comment < end ) ){
+        *comment = 0;
+      }else{
+        *end = 0;
+      }
+      if( setenv(buf,value+1,true) == -1 )
+        perror("Warning: us_read_env_file: setenv failed");
+      if(end){
+        memmove(buf,end+1,(buf+m)-end+1);
+        m -= end-buf+1;
+        continue;
+      }else{
+        memmove(buf,comment+1,(buf+m)-comment+1);
+        m -= comment-buf+1;
+        break;
+      }
+    }
+    if( m > sizeof(buf)-1 ){
+      fprintf(stderr,"Warning: us_read_env_file: an environment variable or comment was too big\n");
+      break;
+    }
+    if(!n) break;
+  }
+  close(fd);
+  return true;
 }
 
 bool us_exec_env_script( const char* script ){
@@ -152,8 +220,7 @@ bool us_exec_env_script( const char* script ){
         char* value = strchr(buf,'=');
         if(!value)
           break;
-        *value = 0;
-        value++;
+        *(value++) = 0;
         if( setenv(buf,value,true) == -1 )
           perror("Warning: us_exec_env_script: setenv failed");
         if( l < m ){

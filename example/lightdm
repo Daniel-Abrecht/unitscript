@@ -1,4 +1,4 @@
-#!/bin/unitscript
+#!/usr/bin/env unitscript
 ### BEGIN INIT INFO
 # Provides:          lightdm
 # Should-Start:      console-screen kbd acpid dbus hal consolekit
@@ -16,4 +16,4 @@ start check: start
 env scripts:
   - /etc/default/locale
 
-program: exec /usr/sbin/lightdm
+program: exec lightdm
