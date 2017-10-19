@@ -38,6 +38,21 @@ bool parse_yaml_boolean( struct us_parser* s, us_boolean_t** ch ){
   return true;
 }
 
+bool parse_integer( size_t length, const char value[length], us_integer_t* c ){
+  char* end = 0;
+  long l = strtol(value, &end, 0);
+  if( !length || (size_t)(end-value) != length ){
+    fprintf(stderr,"Couldn't parse number: %.*s\n",(int)length,value);
+    return false;
+  }
+  if( ( l == LONG_MIN || l == LONG_MAX ) && errno == ERANGE ){
+    fprintf(stderr,"Number out of range: %.*s\n",(int)length,value);
+    return false;
+  }
+  *c = l;
+  return true;
+}
+
 bool parse_yaml_integer( struct us_parser* s, us_integer_t** ch ){
   us_integer_t* c = malloc(sizeof(us_integer_t));
   if(!c){
@@ -45,22 +60,12 @@ bool parse_yaml_integer( struct us_parser* s, us_integer_t** ch ){
     s->done = true;
     return false;
   }
-  char* end = 0;
-  long l = strtol(s->value, &end, 0);
-  if( !s->length || (size_t)(end-s->value) != s->length ){
-    fprintf(stderr,"Couldn't parse number: %.*s\n",(int)s->length,s->value);
-    s->done = true;
+  if( !parse_integer(s->length,s->value,c) ){
     free(c);
-    return false;
-  }
-  if( ( l == LONG_MIN || l == LONG_MAX ) && errno == ERANGE ){
-    fprintf(stderr,"Number out of range: %.*s\n",(int)s->length,s->value);
     s->done = true;
-    free(c);
     return false;
   }
   *ch = c;
-  *c = l;
   return true;
 }
 

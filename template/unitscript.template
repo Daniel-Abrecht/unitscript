@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <sys/types.h>
+#include <sys/resource.h>
 
 struct passwd;
 struct group;
@@ -19,6 +20,18 @@ enum us_logging {
   US_LOGGING_STDIO,
   US_LOGGING_SYSLOG,
   US_LOGGING_NONE
+};
+
+struct us_rlimit_list_entry {
+  const char* name;
+  int resource;
+  rlim_t max;
+  rlim_t cur;
+};
+
+struct us_rlimit_list {
+  struct us_rlimit_list_entry* entries;
+  size_t length;
 };
 
 #define PARSABLE_STRUCTURES \
@@ -38,6 +51,7 @@ enum us_logging {
     ENTRY( string, "program", program ) \
     ENTRY( list, "env scripts", env_scripts ) \
     ENTRY( list, "env files", env_files ) \
+    ENTRY( map, "rlimits", str_rlimits ) \
     PRIVATE( \
       const char* file; \
       struct passwd* userinfo; \
@@ -46,6 +60,7 @@ enum us_logging {
       size_t member_groups_count; \
       enum startcheck startcheck; \
       enum us_logging logging; \
+      struct us_rlimit_list rlimits; \
     ) \
   ))
 

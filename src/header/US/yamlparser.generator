@@ -54,6 +54,7 @@ bool parse_yaml_list( struct us_parser* s, us_list_t** ch );
 bool parse_yaml_skip_unknown_mapping( struct us_parser* s );
 
 void free_yaml_string( us_string_t** ch );
+bool parse_integer( size_t length, const char value[length], us_integer_t* c );
 void free_yaml_integer( us_integer_t** ch );
 void free_yaml_boolean( us_boolean_t** ch );
 void free_yaml_map( us_map_t** ch );

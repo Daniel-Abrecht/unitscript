@@ -70,6 +70,14 @@ int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*f
     if( fdi != fd )
       close(fdi);
 
+  for( size_t i=0; i<unit->rlimits.length; i++ ){
+    if( setrlimit( unit->rlimits.entries[i].resource, (struct rlimit[]){{
+          .rlim_cur = unit->rlimits.entries[i].cur,
+          .rlim_max = unit->rlimits.entries[i].max
+        }}) == -1
+    ) fprintf(stderr,"Warning: failed to set rlimit %s: %s\n",unit->rlimits.entries[i].name,strerror(errno));
+  }
+
   if( unit->groupinfo->gr_gid != getgid() ){
     if( setgroups(unit->member_groups_count,unit->member_groups) ){
       perror("setgroups failed");

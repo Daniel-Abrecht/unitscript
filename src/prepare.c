@@ -234,6 +234,88 @@ int us_prepare( us_unitscript_t* unit ){
     *unit->umask = 0022;
   }
 
+
+  if( unit->str_rlimits && unit->str_rlimits->length ){
+    struct {
+      int resource;
+      const char* name;
+    } rlimit_names[] = {
+      // posix rlimits: http://pubs.opengroup.org/onlinepubs/9699919799/functions/getrlimit.html
+      { RLIMIT_CORE, "core" },
+      { RLIMIT_CPU, "cpu" },
+      { RLIMIT_DATA, "data" },
+      { RLIMIT_FSIZE, "fsize" },
+      { RLIMIT_NOFILE, "nofile" },
+      { RLIMIT_STACK, "stack" },
+      { RLIMIT_AS, "as" },
+#ifdef __linux__
+      { RLIMIT_LOCKS, "locks" },
+      { RLIMIT_MEMLOCK, "memlock" },
+      { RLIMIT_MSGQUEUE, "msgqueue" },
+      { RLIMIT_NICE, "nice" },
+      { RLIMIT_NPROC, "nproc" },
+      { RLIMIT_RSS, "pss" },
+      { RLIMIT_RTPRIO, "rptrio" },
+      { RLIMIT_RTTIME, "rttime" },
+      { RLIMIT_SIGPENDING, "sigpending" },
+#endif
+    };
+    unit->rlimits.entries = malloc( unit->str_rlimits->length * sizeof(*unit->rlimits.entries) );
+    if( !unit->rlimits.entries ){
+      perror("malloc failed");
+      goto failed_after_getgr;
+    }
+    int i=0;
+    for( size_t j=0; j<unit->str_rlimits->length; j++ ){
+      const char* name = unit->str_rlimits->entries[j].key.data;
+      char* svalue_max = unit->str_rlimits->entries[j].value.data;
+      char* svalue_cur = strchr(svalue_max,':');
+      if( svalue_cur ){
+        *(svalue_cur++) = 0;
+      }else{
+        svalue_cur = svalue_max;
+      }
+      us_integer_t max, cur;
+      if( !parse_integer( strlen(svalue_max), svalue_max, &max )
+       || !parse_integer( strlen(svalue_cur), svalue_cur, &cur )
+      ){
+        fprintf(stderr,"Failed to parse value for rlimit '%s', should be <max> or <max>:<cur>, where <max> and <cur> are numbers.\n",name);
+        goto failed_after_getgr;
+      }
+      if( max < cur ){
+        fprintf(stderr,"rlimit %s: <cur> (%ld) must be smaller than <max> (%ld).\n",name,cur,max);
+        goto failed_after_getgr;
+      }
+      if( max < 0 || cur < 0 ){
+        fprintf(stderr,"rlimit %s: rlimits must be positive.\n",name);
+        goto failed_after_getgr;
+      }
+      size_t k = 0;
+      for( ; k<sizeof(rlimit_names)/sizeof(*rlimit_names); k++ )
+        if( !strcmp(name,rlimit_names[k].name) )
+          break;
+      if( k == sizeof(rlimit_names)/sizeof(*rlimit_names) ){
+        fprintf( stderr, "Warning: unsupported rlimit: %s\n", name );
+        continue;
+      }
+      struct us_rlimit_list_entry* e = unit->rlimits.entries + j;
+      e->name = rlimit_names[k].name;
+      e->resource = rlimit_names[k].resource;
+      e->max = max;
+      e->cur = cur;
+      i++;
+    }
+    if(!i){
+      free(unit->rlimits.entries);
+      unit->rlimits.entries = 0;
+    }else{
+      unit->rlimits.length = i;
+      void* tmp = realloc( unit->rlimits.entries, i * sizeof(*unit->rlimits.entries) );
+      if( tmp )
+        unit->rlimits.entries = tmp; // just in case
+    }
+  }
+
   return true;
 failed_after_getgr:
   free(grmemory);
@@ -250,5 +332,7 @@ void us_free( us_unitscript_t* unit ){
     free(unit->userinfo);
   if( unit->groupinfo )
     free(unit->groupinfo);
+  if( unit->rlimits.entries )
+    free(unit->rlimits.entries);
   FREE_YAML( unitscript, &unit );
 }
