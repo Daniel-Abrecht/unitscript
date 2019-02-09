@@ -12,7 +12,7 @@
 #include <US/unitscript.h>
 
 static int start_exec( void* x ){
-  us_unitscript_t* unit = x;
+  gen_unitscript_t* unit = x;
 
   umask(0177);
 
@@ -92,6 +92,6 @@ static int start_exec( void* x ){
   return ret;
 }
 
-int us_start( us_unitscript_t* unit ){
+int us_start( gen_unitscript_t* unit ){
   return us_prepare_execution_environment( unit, unit, &start_exec );
 }

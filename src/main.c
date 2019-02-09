@@ -69,7 +69,7 @@ int main( int argc, const char* argv[] ){
     return 2;
   }
 
-  us_unitscript_t* unit;
+  gen_unitscript_t* unit;
   if( !PARSE_YAML(unitscript,file,&unit) || !unit ){
     fprintf(stderr,"something went wrong!\n");
     fclose(file);

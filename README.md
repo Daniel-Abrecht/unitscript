@@ -59,3 +59,13 @@ In addition to this, all variables specified using the 'env', 'env files' and 'e
 | HOME     | The user home directory as specified in /etc/passwd |
 | PIDFILE  | The location of the pid file |
 | NOTIFICATION_FD | The file descriptor number using which the program can indicate that it finished starting up |
+
+
+## Build requirements
+
+This project requires my dpaparser project for building. You can find it at
+https://github.com/Daniel-Abrecht/dpaparser
+https://gitlab.com/DanielAbrecht/dpaparser
+Or wherever else I'll put a copy of my projects in addition to that in the future.
+
+You'll also need libbsd and libyaml.

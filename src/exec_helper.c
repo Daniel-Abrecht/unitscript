@@ -22,7 +22,7 @@ enum exec_env_role {
 static int fd = -1;
 static enum exec_env_role role = EXEC_ENV_ROLE_PARENT;
 
-int us_prepare_execution_environment( us_unitscript_t* unit, void* param, int(*func)(void*) ){
+int us_prepare_execution_environment( gen_unitscript_t* unit, void* param, int(*func)(void*) ){
   int ret = 0;
 
   if( role != EXEC_ENV_ROLE_PARENT ){
@@ -258,7 +258,7 @@ bool us_exec_env_script( const char* script ){
   }
 }
 
-int us_exec( us_string_t* program ){
+int us_exec( gen_string_t* program ){
   int ret = 0;
 
   if( role != EXEC_ENV_ROLE_CHILD ){

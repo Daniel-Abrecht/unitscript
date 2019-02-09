@@ -11,13 +11,13 @@ enum us_status {
 
 extern const char piddir[];
 
-int us_prepare( us_unitscript_t* unit );
-void us_free( us_unitscript_t* unit );
+int us_prepare( gen_unitscript_t* unit );
+void us_free( gen_unitscript_t* unit );
 
-int us_start( us_unitscript_t* unit );
-int us_stop( us_unitscript_t* unit );
-int us_status( us_unitscript_t* unit, enum us_status* status, pid_t* );
-int us_print_status( us_unitscript_t* unit );
-int us_zap( us_unitscript_t* unit );
+int us_start( gen_unitscript_t* unit );
+int us_stop( gen_unitscript_t* unit );
+int us_status( gen_unitscript_t* unit, enum us_status* status, pid_t* );
+int us_print_status( gen_unitscript_t* unit );
+int us_zap( gen_unitscript_t* unit );
 
 #endif

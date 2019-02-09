@@ -5,7 +5,7 @@
 #include <bsd/libutil.h>
 #include <US/unitscript.h>
 
-int us_status( us_unitscript_t* unit, enum us_status* status, pid_t* pid ){
+int us_status( gen_unitscript_t* unit, enum us_status* status, pid_t* pid ){
   struct pidfh * pfh = 0;
   pid_t otherpid;
   while( true ){
@@ -30,7 +30,7 @@ int us_status( us_unitscript_t* unit, enum us_status* status, pid_t* pid ){
   return 0;
 }
 
-int us_print_status( us_unitscript_t* unit ){
+int us_print_status( gen_unitscript_t* unit ){
   (void)unit;
   enum us_status status;
   pid_t pid;

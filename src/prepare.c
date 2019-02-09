@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <US/unitscript.h>
 
-int us_prepare( us_unitscript_t* unit ){
+int us_prepare( gen_unitscript_t* unit ){
   int ret = 0;
 
   if( unit->uid && unit->user ){
@@ -275,7 +275,7 @@ int us_prepare( us_unitscript_t* unit ){
       }else{
         svalue_cur = svalue_max;
       }
-      us_integer_t max, cur;
+      gen_integer_t max, cur;
       if( !parse_integer( strlen(svalue_max), svalue_max, &max )
        || !parse_integer( strlen(svalue_cur), svalue_cur, &cur )
       ){
@@ -327,7 +327,7 @@ failed:
   return false;
 }
 
-void us_free( us_unitscript_t* unit ){
+void us_free( gen_unitscript_t* unit ){
   if( unit->userinfo )
     free(unit->userinfo);
   if( unit->groupinfo )

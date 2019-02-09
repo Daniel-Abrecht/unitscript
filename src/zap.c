@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <US/unitscript.h>
 
-int us_zap( us_unitscript_t* unit ){
+int us_zap( gen_unitscript_t* unit ){
   if( unlink( unit->pidfile->data ) == -1 ){
     perror("unlink failed");
     return 1;

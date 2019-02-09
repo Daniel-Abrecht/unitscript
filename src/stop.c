@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-int us_stop( us_unitscript_t* unit ){
+int us_stop( gen_unitscript_t* unit ){
   enum us_status status;
   pid_t pid;
   int ret = us_status( unit, &status, &pid );

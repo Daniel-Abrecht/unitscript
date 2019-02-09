@@ -64,5 +64,5 @@ struct us_rlimit_list {
     ) \
   ))
 
-#include <US/yamlparser.generator>
+#include <dpaparser/yaml>
 #endif

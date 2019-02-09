@@ -3,12 +3,12 @@
 
 #include <stdbool.h>
 
-struct us_unitscript;
-struct us_string;
+struct gen_unitscript;
+struct gen_string;
 
-int us_prepare_execution_environment( struct us_unitscript* unit, void* param, int(*)(void*) );
+int us_prepare_execution_environment( struct gen_unitscript* unit, void* param, int(*)(void*) );
 char* us_get_shell(const char* prog);
-int us_exec( struct us_string* program );
+int us_exec( struct gen_string* program );
 void us_wait_exit(void);
 void us_wait_start(void);
 void us_wait_notification(int x);

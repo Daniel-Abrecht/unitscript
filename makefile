@@ -1,41 +1,36 @@
 CC  = gcc
-TMP = tmp
-SRC = src
+BUILD = build
 BIN = bin/unitscript
+
+LIBS += -ldpaparser -lyaml -lbsd
+
+DPAPARSER = dpaparser
 TEMPLATE = template
+TEMPLATE_A = $(BUILD)/libtemplates.a
 
-LIBS += -lyaml -lbsd
-
-INCLUDES += -I$(SRC)/header/
+INCLUDES += -Isrc/header/
 INCLUDES += -I$(TEMPLATE)
 
-OPTIONS = -std=c99 -Og -g -Wall -Werror -Wextra -pedantic
+OPTIONS = -std=c99 -Wall -Werror -Wextra -pedantic
 OPTIONS += $(INCLUDES)
 
-FILES_TMP = $(shell find $(SRC) -type f -name "*.c")
-FILES = $(addprefix tmp/, $(FILES_TMP:.c=.o))
+SOURCES = $(wildcard src/*.c)
+OBJECTS = $(addsuffix .o,$(addprefix $(BUILD)/, $(SOURCES)))
 
-TEMPLATE_FILES_TMP = $(shell find $(TEMPLATE) -type f -name "*.template")
-TEMPLATE_FILES = $(addprefix tmp/, $(TEMPLATE_FILES_TMP:.template=.o))
 
 all: $(BIN)
 
-$(BIN): $(FILES) $(TMP)/lib/usparser.a
+$(BIN): $(OBJECTS) $(TEMPLATE_A)
 	@mkdir -p "$(shell dirname "$@")"
-	gcc $(LIBS) $^ -o $(BIN)
+	$(CC) $^ $(LIBS) -o $(BIN)
 
-$(TMP)/%.o: %.c
-	@mkdir -p "$(shell dirname "$@")"
-	gcc $(OPTIONS) -c $< -o $@
+$(BUILD)/%.c.o: %.c
+	@mkdir -p "$(dir $@)"
+	$(CC) $(OPTIONS) -c $< -o "$@"
 
-$(TMP)/%.o: %.template
-	@mkdir -p "$(shell dirname "$@")"
-	gcc -x c -D US_GENERATE_CODE $(OPTIONS) -c $< -o $@
+$(TEMPLATE_A):
+	$(DPAPARSER) CC="$(CC)" BUILD="$(BUILD)" TEMPLATE="$(TEMPLATE)" TEMPLATE_A="$(TEMPLATE_A)"
 
 clean:
-	rm -rf $(TMP) $(BIN)
+	rm -rf $(BUILD) $(BIN)
 
-$(TMP)/lib/usparser.a: $(TEMPLATE_FILES)
-	rm -f $(TMP)/lib/usparser.a
-	mkdir -p $(TMP)/lib/
-	ar crs $(TMP)/lib/usparser.a $^

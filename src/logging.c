@@ -8,7 +8,7 @@
 #include <US/logging.h>
 
 
-int us_syslog_redirect( struct us_unitscript* unit, int priority ){
+int us_syslog_redirect( struct gen_unitscript* unit, int priority ){
   int fds[2];
 
   if( pipe(fds) ){

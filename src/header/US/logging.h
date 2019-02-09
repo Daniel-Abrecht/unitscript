@@ -1,7 +1,7 @@
 #ifndef US_LOGGING
 
-struct us_unitscript;
+struct gen_unitscript;
 
-int us_syslog_redirect(struct us_unitscript*,int);
+int us_syslog_redirect(struct gen_unitscript*,int);
 
 #endif
